@@ -1,6 +1,6 @@
 # Normalización del corpus
 
-- Generado: 2026-10-11 23:10 UTC
+- Generado: 2026-10-11 23:22 UTC
 - spaCy 3.8.16, modelo `core_web_sm` 3.8.0
 - POS eliminadas: ADP, AUX, CCONJ, DET, PRON, SCONJ; también puntuación y espacios
 - Lematización + minúsculas
