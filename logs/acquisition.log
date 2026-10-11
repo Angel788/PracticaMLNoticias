@@ -1,0 +1,28 @@
+2026-10-11 15:36:49,873 INFO === Inicio de la recolección: categorías=['cs.CL', 'cs.CV', 'cs.IR', 'cs.LG'] cuota=125 ventana=202601010000-202609302359 ===
+2026-10-11 15:36:53,508 INFO OK cs.CL start=0 intento=1
+2026-10-11 15:36:57,264 INFO OK cs.CL start=100 intento=1
+2026-10-11 15:36:57,278 INFO cs.CL: {'vistos': 182, 'otra_primaria': 57, 'duplicado': 0, 'vacio': 0, 'conservados': 125, 'total_api': 21739}
+2026-10-11 15:37:00,929 INFO OK cs.CV start=0 intento=1
+2026-10-11 15:37:04,377 INFO OK cs.CV start=100 intento=1
+2026-10-11 15:37:04,404 INFO cs.CV: {'vistos': 150, 'otra_primaria': 25, 'duplicado': 0, 'vacio': 0, 'conservados': 125, 'total_api': 29710}
+2026-10-11 15:37:07,976 INFO OK cs.IR start=0 intento=1
+2026-10-11 15:37:11,560 INFO OK cs.IR start=100 intento=1
+2026-10-11 15:37:15,711 INFO OK cs.IR start=200 intento=1
+2026-10-11 15:37:15,730 INFO cs.IR: {'vistos': 224, 'otra_primaria': 99, 'duplicado': 0, 'vacio': 0, 'conservados': 125, 'total_api': 4113}
+2026-10-11 15:37:19,294 INFO OK cs.LG start=0 intento=1
+2026-10-11 15:37:22,877 INFO OK cs.LG start=100 intento=1
+2026-10-11 15:37:26,371 INFO OK cs.LG start=200 intento=1
+2026-10-11 15:37:26,390 INFO cs.LG: {'vistos': 209, 'otra_primaria': 84, 'duplicado': 0, 'vacio': 0, 'conservados': 125, 'total_api': 42587}
+2026-10-11 15:37:26,460 INFO Corpus guardado: /home/mrangello/Documentos/PracticaML/data/scientific_raw_corpus.tsv (500 filas)
+2026-10-11 15:46:14,896 INFO === Inicio de la recolección: categorías=['cs.CL', 'cs.CV', 'cs.IR', 'cs.LG'] cuota=125 ventana=202601010000-202609302359 ===
+2026-10-11 15:46:50,050 INFO cs.CL: {'vistos': 182, 'otra_primaria': 57, 'duplicado': 0, 'vacio': 0, 'conservados': 125, 'total_api': 21739}
+2026-10-11 15:46:50,062 INFO cs.CV: {'vistos': 150, 'otra_primaria': 25, 'duplicado': 0, 'vacio': 0, 'conservados': 125, 'total_api': 29710}
+2026-10-11 15:46:50,083 INFO cs.IR: {'vistos': 224, 'otra_primaria': 99, 'duplicado': 0, 'vacio': 0, 'conservados': 125, 'total_api': 4113}
+2026-10-11 15:46:50,100 INFO cs.LG: {'vistos': 209, 'otra_primaria': 84, 'duplicado': 0, 'vacio': 0, 'conservados': 125, 'total_api': 42587}
+2026-10-11 16:12:49,169 INFO === Inicio de la recolección: categorías=['cs.CL', 'cs.CV', 'cs.IR', 'cs.LG'] cuota=125 ventana=202601010000-202609302359 ===
+2026-10-11 16:12:49,201 INFO cs.CL: {'vistos': 182, 'otra_primaria': 57, 'duplicado': 0, 'vacio': 0, 'conservados': 125, 'total_api': 21739}
+2026-10-11 16:12:49,212 INFO cs.CV: {'vistos': 150, 'otra_primaria': 25, 'duplicado': 0, 'vacio': 0, 'conservados': 125, 'total_api': 29710}
+2026-10-11 16:12:49,230 INFO cs.IR: {'vistos': 224, 'otra_primaria': 99, 'duplicado': 0, 'vacio': 0, 'conservados': 125, 'total_api': 4113}
+2026-10-11 16:12:49,244 INFO cs.LG: {'vistos': 209, 'otra_primaria': 84, 'duplicado': 0, 'vacio': 0, 'conservados': 125, 'total_api': 42587}
+2026-10-11 16:12:49,305 INFO Corpus guardado: /home/mrangello/Documentos/PracticaML/data/scientific_raw_corpus.tsv (500 filas)
+2026-10-11 16:12:52,886 INFO Verificación en vivo: 10/10 títulos y 10/10 abstracts iguales
