@@ -162,6 +162,31 @@ Conteo de documentos cuyo título o abstract contiene las palabras clave (búsqu
 
 ---
 
+### Comandos para probar la CLI
+
+Prueba la interacción en tu terminal mediante los siguientes comandos:
+
+1. **Búsqueda directa**:
+
+```bash
+python -m src.cli query "image segmentation" --field abstract --repr binary -k 5
+
+```
+
+2. **Evaluación del benchmark**:
+
+```bash
+python -m src.cli benchmark --all
+
+```
+
+3. **Validación del benchmark**:
+
+```bash
+python -m src.cli benchmark --check
+```
+
+
 ## 9. Checklist por consulta
 
 - [ ] Está en inglés y tiene de 3 a 8 palabras.
