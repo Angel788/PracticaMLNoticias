@@ -66,8 +66,8 @@ git add data/benchmark/queries.tsv data/benchmark/qrels.tsv
 git commit -m "Benchmark v1: 15 consultas y qrels"
 git tag benchmark-v2 #Cambiar el tag en evaluate si cambia la versión
 
-python -m src.evaluate                                    
+python -m src.evaluate
 python -m src.evaluate --field title --ngram bigram --repr binary
-python -m src.evaluate --all                              
+python -m src.evaluate --all
 
 Con eso se generan data/benchmark/rankings.tsv, results/metrics_per_query.tsv y results/metrics_summary.tsv (con --all, results/metrics_all_configs.tsv).
