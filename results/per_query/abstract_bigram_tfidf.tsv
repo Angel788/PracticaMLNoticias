@@ -1,0 +1,16 @@
+query_id	difficulty_level	query	n_relevant	P@10	R@10	F1@10	RR	nDCG@10
+Q01	1	sequential recommendation with user behavior sequences	15	0.9000	0.6000	0.7200	1.0000	0.8077
+Q02	1	long video understanding with vision-language models	15	0.9000	0.6000	0.7200	1.0000	0.8239
+Q03	1	reranking retrieved documents with large language models	15	0.0000	0.0000	0.0000	0.0000	0.0000
+Q04	1	video generation with diffusion models	15	0.4000	0.2667	0.3200	1.0000	0.4808
+Q05	1	retrieval-augmented generation for multi-hop question answering	15	0.7000	0.4667	0.5600	1.0000	0.5565
+Q06	2	on-policy self-distillation for reasoning models	13	0.5000	0.3846	0.4348	1.0000	0.6483
+Q07	2	parameter-efficient fine-tuning with low-rank adapters	15	0.6000	0.4000	0.4800	1.0000	0.7390
+Q08	2	policy optimization in reinforcement learning	15	0.6000	0.4000	0.4800	1.0000	0.6995
+Q09	2	large language models as judges for evaluation	15	0.0000	0.0000	0.0000	0.0000	0.0000
+Q10	2	multilingual language models for low-resource languages	15	0.4000	0.2667	0.3200	1.0000	0.5541
+Q11	3	making neural networks smaller and faster	15	0.0000	0.0000	0.0000	0.0000	0.0000
+Q12	3	AI reading hospital scans to detect illness	11	0.0000	0.0000	0.0000	0.0000	0.0000
+Q13	3	defending AI systems against malicious manipulation	14	0.0000	0.0000	0.0000	0.0000	0.0000
+Q14	3	peeking inside language models to explain their behavior	15	0.1000	0.0667	0.0800	0.2500	0.0316
+Q15	3	assistants that remember past experiences	15	0.1000	0.0667	0.0800	0.5000	0.0483

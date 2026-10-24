@@ -30,6 +30,7 @@ from src.retrieve import FIELDS, NGRAMS, REPRS, RAW_PATH, EmptyQueryError, retri
 
 BENCH_DIR = ROOT / "data" / "benchmark"
 RESULTS_DIR = ROOT / "results"
+PER_QUERY_DIR = RESULTS_DIR / "per_query"
 QUERIES_PATH = BENCH_DIR / "queries.tsv"
 QRELS_PATH = BENCH_DIR / "qrels.tsv"
 FREEZE_TAG = "benchmark-v1"
@@ -229,8 +230,12 @@ def main(argv=None) -> int:
     RESULTS_DIR.mkdir(exist_ok=True)
     if args.all:
         rows = []
+        PER_QUERY_DIR.mkdir(exist_ok=True)
         for field, ngram, repr_ in product(FIELDS, NGRAMS, REPRS):
             _, metrics = run_benchmark(queries, qrels, field, ngram, repr_)
+            # Métricas de cada consulta: un archivo por configuración
+            metrics.to_csv(PER_QUERY_DIR / f"{field}_{ngram}_{repr_}.tsv", sep="\t", index=False,
+                           float_format="%.4f")
             # to_dict y no itertuples: itertuples renombra a _1, _2... las columnas
             # cuyo nombre no es un identificador válido (P@10, R@10, F1@10, nDCG@10)
             for row in summarize(metrics).to_dict("records"):
@@ -240,7 +245,7 @@ def main(argv=None) -> int:
         table.to_csv(out, sep="\t", index=False, float_format="%.4f")
         overall = table[table["difficulty_level"] == "all"].drop(columns="difficulty_level")
         print(overall.sort_values("nDCG@10", ascending=False).to_string(index=False, float_format="%.4f"))
-        print(f"\nGuardado: {out.relative_to(ROOT)}")
+        print(f"\nGuardado: {out.relative_to(ROOT)} y {PER_QUERY_DIR.relative_to(ROOT)}/<config>.tsv")
         return 0
 
     rankings, metrics = run_benchmark(queries, qrels, args.field, args.ngram, args.repr_)
