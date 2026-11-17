@@ -14,13 +14,14 @@ from src.etapa2.config import (
 from src.etapa2.splits import assign_splits, check_splits
 
 
+# Lee el corpus crudo como texto.
 def load_raw() -> pd.DataFrame:
     # dtype=str: si no, arxiv_id se lee como float y pierde ceros (2610.00840 -> 2610.0084)
     return pd.read_csv(RAW_CORPUS_PATH, sep="\t", dtype=str, keep_default_na=False)
 
 
+# Verifica la política de etiqueta; lanza ValueError si algo no cuadra.
 def check_labels(raw: pd.DataFrame) -> None:
-    """Verifica la política de etiqueta; lanza ValueError si algo no cuadra."""
     if (raw["primary_category"] == "").any():
         raise ValueError("Hay documentos sin primary_category")
     unknown = set(raw["primary_category"]) - set(CLASSES)
@@ -34,7 +35,9 @@ def check_labels(raw: pd.DataFrame) -> None:
         raise ValueError("arxiv_id duplicados")
 
 
+# Construye labeled_documents.tsv con texto, etiqueta y split.
 def build_labeled(raw: pd.DataFrame) -> pd.DataFrame:
+    # Colapsa espacios y saltos de línea.
     def clean(s: pd.Series) -> pd.Series:
         return s.str.split().str.join(" ")  # colapsa espacios y saltos de línea
 
@@ -48,16 +51,18 @@ def build_labeled(raw: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+# Lee labeled_documents.tsv.
 def load_labeled() -> pd.DataFrame:
     return pd.read_csv(LABELED_PATH, sep="\t", dtype=str, keep_default_na=False)
 
 
+# Porcentaje de documentos de cada clase con al menos una categoría secundaria.
 def cross_listing_rate(df: pd.DataFrame) -> pd.Series:
-    """Porcentaje de documentos de cada clase con al menos una categoría secundaria."""
     secondary = df["categories"].str.split().str.len() > 1
     return (secondary.groupby(df["label"]).mean() * 100).round(1)
 
 
+# Dibuja la distribución de clases por partición.
 def plot_distribution(df: pd.DataFrame, path) -> None:
     table = pd.crosstab(df["label"], df["split"])[["train", "dev", "test"]]
     ax = table.plot(kind="bar", stacked=True, figsize=(6, 4), rot=0)
@@ -71,6 +76,7 @@ def plot_distribution(df: pd.DataFrame, path) -> None:
     plt.close()
 
 
+# Genera labeled_documents.tsv y la figura de distribución.
 def main() -> None:
     raw = load_raw()
     check_labels(raw)

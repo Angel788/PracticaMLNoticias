@@ -19,10 +19,12 @@ from src.etapa2.labels import load_labeled
 from src.normalize import get_nlp, normalize_doc
 
 
+# N0: tokeniza con spaCy y conserva mayúsculas y puntuación.
 def normalize_n0(doc) -> str:
     return " ".join(t.text for t in doc if not t.is_space)
 
 
+# N1: minúsculas, sin puntuación ni stopwords.
 def normalize_n1(doc) -> str:
     return " ".join(
         t.lower_ for t in doc
@@ -33,8 +35,8 @@ def normalize_n1(doc) -> str:
 NORMALIZERS = {"N0": normalize_n0, "N1": normalize_n1, "N2": normalize_doc}
 
 
+# Procesa cada texto una vez con nlp.pipe y aplica las tres configuraciones.
 def build_variants(df: pd.DataFrame) -> pd.DataFrame:
-    """Procesa cada texto una vez con nlp.pipe y aplica las tres configuraciones."""
     rows = {name: [] for name in NORMALIZATIONS}
     for doc in get_nlp().pipe(df["text"], batch_size=64):
         for name in NORMALIZATIONS:
@@ -45,6 +47,7 @@ def build_variants(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
+# Lee la caché normalized_variants.tsv.
 def load_variants() -> pd.DataFrame:
     return pd.read_csv(NORMALIZED_PATH, sep="\t", dtype=str, keep_default_na=False)
 
@@ -56,12 +59,15 @@ class NormalizedText(BaseEstimator, TransformerMixin):
     por el mismo camino y la normalización es un hiperparámetro más.
     """
 
+    # Guarda la variante N0/N1/N2.
     def __init__(self, variant: str = "N2"):
         self.variant = variant
 
+    # No aprende nada; devuelve el transformador.
     def fit(self, X, y=None):
         return self
 
+    # Mapea document_id al texto normalizado de la caché.
     def transform(self, X):
         lookup = _lookup(self.variant)
         return [lookup[doc_id] for doc_id in X]
@@ -70,6 +76,7 @@ class NormalizedText(BaseEstimator, TransformerMixin):
 _CACHE: dict[str, dict[str, str]] = {}
 
 
+# Carga y cachea el diccionario document_id → texto.
 def _lookup(variant: str) -> dict[str, str]:
     if variant not in _CACHE:
         variants = load_variants()
@@ -77,6 +84,7 @@ def _lookup(variant: str) -> dict[str, str]:
     return _CACHE[variant]
 
 
+# Genera la caché de las tres normalizaciones.
 def main() -> None:
     df = load_labeled()
     variants = build_variants(df)

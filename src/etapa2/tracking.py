@@ -24,6 +24,7 @@ COLUMNS = [
 ]
 
 
+# Crea experiments.tsv con encabezados si no existe.
 def init_experiments(overwrite: bool = False) -> None:
     if EXPERIMENTS_PATH.exists() and not overwrite:
         return
@@ -31,13 +32,14 @@ def init_experiments(overwrite: bool = False) -> None:
     pd.DataFrame(columns=COLUMNS).to_csv(EXPERIMENTS_PATH, sep="\t", index=False)
 
 
+# Lee experiments.tsv como texto.
 def load_experiments() -> pd.DataFrame:
     init_experiments()
     return pd.read_csv(EXPERIMENTS_PATH, sep="\t", dtype=str, keep_default_na=False)
 
 
+# Agrega una fila. Si el experiment_id ya existe, lo reemplaza (re-ejecuciones).
 def log_experiment(**row) -> None:
-    """Agrega una fila. Si el experiment_id ya existe, lo reemplaza (re-ejecuciones)."""
     unknown = set(row) - set(COLUMNS)
     if unknown:
         raise ValueError(f"Columnas desconocidas: {unknown}")
@@ -51,8 +53,8 @@ def log_experiment(**row) -> None:
     df.sort_values("experiment_id").to_csv(EXPERIMENTS_PATH, sep="\t", index=False)
 
 
+# Escribe la columna notes de un experimento ya registrado.
 def annotate(experiment_id: str, notes: str) -> None:
-    """Escribe la columna notes de un experimento ya registrado."""
     df = load_experiments()
     mask = df["experiment_id"] == experiment_id
     if not mask.any():
@@ -61,9 +63,9 @@ def annotate(experiment_id: str, notes: str) -> None:
     df.to_csv(EXPERIMENTS_PATH, sep="\t", index=False)
 
 
+# Marca un experimento como seleccionado y, opcionalmente, anota el motivo.
 def mark_selected(experiment_id: str, notes: str | None = None,
                   append: bool = True) -> None:
-    """Marca un experimento como seleccionado y, opcionalmente, anota el motivo."""
     df = load_experiments()
     mask = df["experiment_id"] == experiment_id
     if not mask.any():

@@ -44,11 +44,13 @@ MODEL_GRIDS = {
 VECTORIZER_GRID = {"vec__min_df": [1, 2]}
 
 
+# Tokeniza por espacios; el texto ya viene normalizado.
 def whitespace_tokenizer(text: str) -> list[str]:
     # El texto ya viene normalizado (N0/N1/N2): el vectorizador no debe volver a tokenizar
     return text.split()
 
 
+# Crea el vectorizador de la representación pedida.
 def make_vectorizer(representation: str, ngram_range: tuple[int, int]):
     # lowercase=False y tokenizer propio: si no, el vectorizador pasaría todo a
     # minúsculas y quitaría la puntuación, y N0 quedaría igual que N1.
@@ -65,6 +67,7 @@ def make_vectorizer(representation: str, ngram_range: tuple[int, int]):
     raise ValueError(f"Representación desconocida: {representation}")
 
 
+# Arma normalización → vectorizador → [SVD] → clasificador.
 def build_pipeline(model, normalization="N2", representation="tfidf",
                    ngram_range=(1, 1), svd_components=None) -> Pipeline:
     if model == "MultinomialNB" and svd_components:
@@ -79,11 +82,13 @@ def build_pipeline(model, normalization="N2", representation="tfidf",
     return Pipeline(steps)
 
 
+# Extrae document_id y etiquetas de una partición.
 def get_split(df: pd.DataFrame, split: str):
     part = df[df["split"] == split]
     return part["document_id"].tolist(), part["label"].to_numpy()
 
 
+# Calcula accuracy y macro precisión, recall y F1.
 def evaluate(y_true, y_pred) -> dict:
     p, r, f1, _ = precision_recall_fscore_support(y_true, y_pred, average="macro", zero_division=0)
     return {
@@ -92,6 +97,7 @@ def evaluate(y_true, y_pred) -> dict:
     }
 
 
+# Tabla de precisión, recall y F1 por clase.
 def per_class_table(y_true, y_pred) -> pd.DataFrame:
     p, r, f1, support = precision_recall_fscore_support(
         y_true, y_pred, labels=CLASSES, zero_division=0)
@@ -100,19 +106,21 @@ def per_class_table(y_true, y_pred) -> pd.DataFrame:
     })
 
 
+# Matriz de confusión con clases en filas y columnas.
 def confusion_table(y_true, y_pred) -> pd.DataFrame:
     cm = confusion_matrix(y_true, y_pred, labels=CLASSES)
     return pd.DataFrame(cm, index=pd.Index(CLASSES, name="gold"),
                         columns=pd.Index(CLASSES, name="predicted"))
 
 
+# Formatea hiperparámetros como 'C=1; min_df=2'.
 def format_params(params: dict) -> str:
     return "; ".join(f"{k.split('__', 1)[1]}={v}" for k, v in sorted(params.items()))
 
 
+# Busca hiperparámetros en train (CV 5), evalúa el mejor en dev y lo registra.
 def run_experiment(experiment_id, block, model, normalization="N2", representation="tfidf",
                    ngram_range=(1, 1), svd_components=None, df=None, notes="") -> dict:
-    """Busca hiperparámetros en train (CV 5), evalúa el mejor en dev y lo registra."""
     df = load_labeled() if df is None else df
     X_train, y_train = get_split(df, "train")
     X_dev, y_dev = get_split(df, "dev")
@@ -164,6 +172,7 @@ def run_experiment(experiment_id, block, model, normalization="N2", representati
     }
 
 
+# Tabla resumen de una lista de resultados.
 def summary(results: list[dict]) -> pd.DataFrame:
     cols = ["experiment_id", "model", "normalization", "representation", "ngram_range",
             "svd_components", "best_params", "cv_macro_f1", "cv_std", "dev_accuracy",
@@ -171,8 +180,8 @@ def summary(results: list[dict]) -> pd.DataFrame:
     return pd.DataFrame([{c: r[c] for c in cols} for r in results]).set_index("experiment_id")
 
 
+# Resultado de cada combinación de hiperparámetros en la CV de train.
 def cv_table(result: dict) -> pd.DataFrame:
-    """Resultado de cada combinación de hiperparámetros en la CV de train."""
     cv = result["search"].cv_results_
     table = pd.DataFrame(cv["params"]).rename(columns=lambda c: c.split("__", 1)[1])
     table["cv_macro_f1"] = cv["mean_test_score"]
@@ -180,8 +189,8 @@ def cv_table(result: dict) -> pd.DataFrame:
     return table.sort_values("cv_macro_f1", ascending=False).reset_index(drop=True)
 
 
+# C-1: los tres clasificadores con N2, TF-IDF y unigramas.
 def run_block_c1(df=None) -> list[dict]:
-    """C-1: los tres clasificadores con N2, TF-IDF y unigramas."""
     df = load_labeled() if df is None else df
     return [
         run_experiment(f"C{i:02d}", "C-1", model, df=df)
@@ -189,13 +198,8 @@ def run_block_c1(df=None) -> list[dict]:
     ]
 
 
+# C-2: N0 y N1 con los tres clasificadores (TF-IDF, unigramas).
 def run_block_c2(df=None) -> list[dict]:
-    """C-2: N0 y N1 con los tres clasificadores (TF-IDF, unigramas).
-
-    N2 con TF-IDF (1,1) es exactamente C-1, así que no se duplica: se vuelve a
-    correr con sus mismos IDs (C01-C03) para tener los nueve resultados juntos.
-    El ajuste es determinista y la fila registrada queda igual.
-    """
     df = load_labeled() if df is None else df
     results = []
     next_id = 4
@@ -234,12 +238,8 @@ C5_COMPLEMENT = [
 ]
 
 
+# Reconstruye el resumen de un experimento ya registrado.
 def load_stored_result(experiment_id: str) -> dict:
-    """Reconstruye el resumen de un experimento ya registrado.
-
-    Sirve para reutilizar la celda de referencia de un bloque anterior sin
-    reentrenar y sin borrar sus notas de experiments.tsv.
-    """
     row = load_experiments().set_index("experiment_id").loc[experiment_id]
     dev = dict(part.split("=", 1) for part in row["dev_metric"].split("; "))
     extra = dict(part.split("=", 1) for part in row["extra"].split("; "))
@@ -261,16 +261,13 @@ def load_stored_result(experiment_id: str) -> dict:
     }
 
 
+# Carga resultados ya registrados por su ID.
 def load_results(experiment_ids: list[str]) -> list[dict]:
     return [load_stored_result(i) for i in experiment_ids]
 
 
+# C-3: binaria, frecuencia y TF-IDF con la mejor normalización de C-2.
 def run_block_c3(df=None) -> list[dict]:
-    """C-3: binaria, frecuencia y TF-IDF con la mejor normalización de C-2.
-
-    La celda TF-IDF ya está medida en C-2 (C07, C02, C06), así que solo se
-    corren las representaciones nuevas: 6 experimentos (C10-C15).
-    """
     df = load_labeled() if df is None else df
     results = []
     next_id = 10
@@ -288,12 +285,8 @@ def run_block_c3(df=None) -> list[dict]:
     return results
 
 
+# C-4: n-gramas (1,2) y (1,3) sobre la mejor representación de C-3.
 def run_block_c4(df=None, best_c3=None) -> list[dict]:
-    """C-4: n-gramas (1,2) y (1,3) sobre la mejor representación de C-3.
-
-    La celda (1,1) ya está en C-3, así que no se repite: 6 experimentos
-    nuevos (C16-C21).
-    """
     df = load_labeled() if df is None else df
     if best_c3 is None:
         raise ValueError("best_c3 es obligatorio: mejor resultado de C-3 por modelo")
@@ -314,12 +307,8 @@ def run_block_c4(df=None, best_c3=None) -> list[dict]:
     return results
 
 
+# C-5: SVD de 100 y 200 componentes para LR y SVC.
 def run_block_c5(df=None, best_c4=None) -> list[dict]:
-    """C-5: SVD de 100 y 200 componentes para LR y SVC.
-
-    MultinomialNB no se prueba porque SVD produce valores negativos. Se parte
-    de la mejor configuración de C-4: 4 experimentos nuevos (C22-C25).
-    """
     df = load_labeled() if df is None else df
     if best_c4 is None:
         raise ValueError("best_c4 es obligatorio: mejor resultado de C-4 por modelo")
@@ -341,15 +330,8 @@ def run_block_c5(df=None, best_c4=None) -> list[dict]:
     return results
 
 
+# Complemento de C-5: SVD sobre la configuración final de cada modelo.
 def run_block_c5_complement(df=None) -> list[dict]:
-    """Complemento de C-5: SVD sobre la configuración final de cada modelo.
-
-    C22-C25 prueban SVD sobre la mejor configuración de C-4; para LR eso son
-    bigramas (C18), pero el modelo que llega a la selección final es C02
-    (unigramas). Faltaba comprobar si el SVD ayuda a esa configuración. Se
-    añaden 50, 100 y 200 componentes para LR y 50 para SVC (100 y 200 ya están
-    en C24-C25). Son 4 experimentos nuevos: C26-C29.
-    """
     df = load_labeled() if df is None else df
     results = []
     for experiment_id, model, normalization, ngram_range, svd, reference in C5_COMPLEMENT:
@@ -363,8 +345,8 @@ def run_block_c5_complement(df=None) -> list[dict]:
     return results
 
 
+# Ejecuta C-4 o C-5 leyendo del registro el mejor resultado del bloque anterior.
 def run_from_registry(block: str) -> list[dict]:
-    """Ejecuta C-4 o C-5 leyendo del registro el mejor resultado del bloque anterior."""
     df = load_labeled()
     c3_results = load_results(C3_IDS + [C3_REFERENCE[m] for m in MODELS])
     best_c3 = best_per_model(c3_results)
@@ -377,8 +359,8 @@ def run_from_registry(block: str) -> list[dict]:
     raise ValueError(f"Bloque no soportado desde el registro: {block}")
 
 
+# Mejor resultado de cada modelo por macro-F1 en dev; empate -> mayor CV.
 def best_per_model(results: list[dict]) -> dict[str, dict]:
-    """Mejor resultado de cada modelo por macro-F1 en dev; empate -> mayor CV."""
     best = {}
     for r in results:
         current = best.get(r["model"])

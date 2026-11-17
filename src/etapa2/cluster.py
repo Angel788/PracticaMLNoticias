@@ -52,6 +52,7 @@ TIE = 0.01
 SELECTED_FINAL = "K02"
 
 
+# Arma normalización → vectorizador → [SVD] → L2 → KMeans.
 def build_pipeline(k, normalization="N2", representation="tfidf",
                    ngram_range=(1, 1), svd_components=100,
                    init="k-means++", n_init=10, max_iter=300) -> Pipeline:
@@ -70,10 +71,12 @@ def build_pipeline(k, normalization="N2", representation="tfidf",
     return Pipeline(steps)
 
 
+# Convierte una matriz dispersa a densa si hace falta.
 def to_dense(matrix):
     return matrix.toarray() if hasattr(matrix, "toarray") else np.asarray(matrix)
 
 
+# Mide estabilidad con 5 semillas y ARI entre particiones.
 def stability_ari(space, k, init, n_init, max_iter, seeds=range(5)):
     partitions = []
     for seed in seeds:
@@ -87,15 +90,9 @@ def stability_ari(space, k, init, n_init, max_iter, seeds=range(5)):
     return float(np.mean(aris)), float(np.std(aris))
 
 
+# Palabras de contenido por cluster en el espacio original de palabras.
 def content_top_words(texts: list[str], labels, k: int,
                       n: int = 10) -> dict[int, list[str]]:
-    """Palabras de contenido por cluster en el espacio original de palabras.
-
-    Se usa un vocabulario restringido a palabras alfabéticas de 4+ letras que
-    aparecen en al menos 5 documentos y en menos del 50 % del corpus. Así se
-    evita que los números, el LaTeX, la puntuación y las stopwords dominen el
-    top-10. Es solo para interpretar: el clustering usa su propio vectorizador.
-    """
     vectorizer = CountVectorizer(
         min_df=5, max_df=0.5, stop_words="english",
         token_pattern=r"(?u)\b[a-zA-Z][a-zA-Z\-]{3,}\b",
@@ -129,8 +126,8 @@ def content_top_words(texts: list[str], labels, k: int,
     return out
 
 
+# 1 - solapamiento medio entre los top-10 de los clusters (0 a 1).
 def top_word_distinctiveness(top_words: dict[int, list[str]]) -> float:
-    """1 - solapamiento medio entre los top-10 de los clusters (0 a 1)."""
     sets = [set(words[:10]) for words in top_words.values() if words]
     if len(sets) < 2:
         return 0.0
@@ -142,6 +139,7 @@ def top_word_distinctiveness(top_words: dict[int, list[str]]) -> float:
     return 1.0 - float(np.mean(overlaps))
 
 
+# Elige los documentos más cercanos al centroide de cada cluster.
 def representative_docs(space, labels, doc_ids, k, n=2) -> dict[int, list[str]]:
     doc_ids = np.asarray(doc_ids)
     out = {}
@@ -157,6 +155,7 @@ def representative_docs(space, labels, doc_ids, k, n=2) -> dict[int, list[str]]:
     return out
 
 
+# Entrena K-Means, calcula silhouette/ARI/NMI y registra el experimento.
 def run_kmeans(experiment_id, block, k, normalization="N2",
                representation="tfidf", ngram_range=(1, 1), svd_components=100,
                init="k-means++", n_init=10, max_iter=300, df=None,
@@ -243,6 +242,7 @@ def run_kmeans(experiment_id, block, k, normalization="N2",
     }
 
 
+# Reconstruye el resumen de un K-Means ya registrado.
 def load_stored_k_result(experiment_id: str) -> dict:
     row = load_experiments().set_index("experiment_id").loc[experiment_id]
     extra = dict(part.split("=", 1) for part in row["extra"].split("; "))
@@ -268,8 +268,8 @@ def load_stored_k_result(experiment_id: str) -> dict:
     }
 
 
+# Mayor silhouette en dev; empate -> estabilidad y tamaños equilibrados.
 def choose_best(candidates: list[dict]) -> dict:
-    """Mayor silhouette en dev; empate -> estabilidad y tamaños equilibrados."""
     top = max(c["dev_silhouette"] for c in candidates)
     tied = [c for c in candidates if top - c["dev_silhouette"] <= TIE]
     tied.sort(key=lambda c: (
@@ -280,6 +280,7 @@ def choose_best(candidates: list[dict]) -> dict:
     return tied[0]
 
 
+# Corre K-1: k ∈ {3,4,5,6,8} con N2, TF-IDF y SVD 100.
 def run_block_k1(df=None) -> list[dict]:
     df = load_labeled() if df is None else df
     return [
@@ -289,6 +290,7 @@ def run_block_k1(df=None) -> list[dict]:
     ]
 
 
+# Corre K-2: N0 y N1 con el mejor k de K-1.
 def run_block_k2(df=None, best_k1=None) -> list[dict]:
     df = load_labeled() if df is None else df
     return [
@@ -299,6 +301,7 @@ def run_block_k2(df=None, best_k1=None) -> list[dict]:
     ]
 
 
+# Corre K-3: frecuencia vs TF-IDF con la mejor normalización.
 def run_block_k3(df=None, best_k2=None) -> list[dict]:
     df = load_labeled() if df is None else df
     return [run_kmeans(
@@ -310,6 +313,7 @@ def run_block_k3(df=None, best_k2=None) -> list[dict]:
     )]
 
 
+# Corre K-4: bigramas vs unigramas con la mejor representación.
 def run_block_k4(df=None, best_k3=None) -> list[dict]:
     df = load_labeled() if df is None else df
     return [run_kmeans(
@@ -321,6 +325,7 @@ def run_block_k4(df=None, best_k3=None) -> list[dict]:
     )]
 
 
+# Corre K-5: sin SVD, 50, 100 y 200 componentes.
 def run_block_k5(df=None, best_k4=None) -> list[dict]:
     df = load_labeled() if df is None else df
     results = []
@@ -337,6 +342,7 @@ def run_block_k5(df=None, best_k4=None) -> list[dict]:
     return results
 
 
+# Corre K-6: init, n_init y max_iter con la mejor configuración.
 def run_block_k6(df=None, best_k5=None) -> list[dict]:
     df = load_labeled() if df is None else df
     configs = [
@@ -360,6 +366,7 @@ def run_block_k6(df=None, best_k5=None) -> list[dict]:
     return results
 
 
+# Figura de silhouette en train y dev contra k.
 def plot_silhouette_vs_k(k1_results: list[dict], path) -> None:
     ks = [r["k"] for r in k1_results]
     train = [r["train_silhouette"] for r in k1_results]
@@ -382,6 +389,7 @@ def plot_silhouette_vs_k(k1_results: list[dict], path) -> None:
     plt.close()
 
 
+# Barras apiladas de tamaños por cluster y split.
 def plot_cluster_sizes(assignments: pd.DataFrame, path) -> None:
     table = pd.crosstab(assignments["cluster_id"], assignments["split"])
     order = [c for c in ["train", "dev", "test"] if c in table.columns]
@@ -398,6 +406,7 @@ def plot_cluster_sizes(assignments: pd.DataFrame, path) -> None:
     plt.close()
 
 
+# Mapa de calor de categoría real contra cluster.
 def plot_contingency(contingency: pd.DataFrame, path) -> None:
     fig, ax = plt.subplots(figsize=(6, 4))
     im = ax.imshow(contingency.values, cmap="Blues", vmin=0)
@@ -419,6 +428,7 @@ def plot_contingency(contingency: pd.DataFrame, path) -> None:
     plt.close()
 
 
+# Reajusta K02 en train+dev, asigna test y escribe los entregables.
 def finalize(best: dict, k1_results: list[dict], df: pd.DataFrame) -> dict:
     train_dev = df[df["split"].isin(["train", "dev"])]
     test = df[df["split"] == "test"]
@@ -539,6 +549,7 @@ def finalize(best: dict, k1_results: list[dict], df: pd.DataFrame) -> dict:
     }
 
 
+# Quita selected y anota por qué se descartó un experimento.
 def unselect(experiment_id: str, note: str) -> None:
     exp = load_experiments()
     mask = exp["experiment_id"] == experiment_id
@@ -550,6 +561,7 @@ def unselect(experiment_id: str, note: str) -> None:
     exp.to_csv(EXPERIMENTS_PATH, sep="\t", index=False)
 
 
+# Ejecuta K-1 a K-6, elige K02 y genera los resultados finales.
 def run_all(df=None) -> dict:
     df = load_labeled() if df is None else df
     k1 = run_block_k1(df)

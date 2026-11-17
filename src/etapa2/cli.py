@@ -22,17 +22,20 @@ CLUSTER_RESULTS_PATH = RESULTS_DIR / "clustering_results.tsv"
 CLUSTER_SUMMARY_PATH = RESULTS_DIR / "cluster_summary.tsv"
 
 
+# Lee un TSV o termina con un mensaje si no existe.
 def read_tsv(path) -> pd.DataFrame:
     if not path.exists():
         raise SystemExit(f"No existe {path}. Ejecuta primero el paso que lo genera.")
     return pd.read_csv(path, sep="\t", dtype=str, keep_default_na=False)
 
 
+# Imprime un DataFrame con tabulate.
 def show(df: pd.DataFrame, floatfmt: str = ".4f") -> None:
     print(tabulate(df, headers="keys", tablefmt="simple",
                    showindex=False, floatfmt=floatfmt))
 
 
+# Subcomando metrics: tabla general o detalle de un experimento.
 def cmd_metrics(args: argparse.Namespace) -> None:
     metrics = read_tsv(METRICS_PATH)
     for col in ["accuracy", "macro_precision", "macro_recall", "macro_f1"]:
@@ -67,6 +70,7 @@ def cmd_metrics(args: argparse.Namespace) -> None:
             print(cm.to_string())
 
 
+# Subcomando clusters: tamaños, palabras y representativos.
 def cmd_clusters(args: argparse.Namespace) -> None:
     summary = read_tsv(CLUSTER_SUMMARY_PATH)
     summary["size"] = pd.to_numeric(summary["size"])
@@ -104,6 +108,7 @@ def cmd_clusters(args: argparse.Namespace) -> None:
         print(f"- {doc_id} · {doc['primary_category']} · {doc['title'][:110]}")
 
 
+# Subcomando experiments: ranking por métrica en dev.
 def cmd_experiments(args: argparse.Namespace) -> None:
     exp = read_tsv(EXPERIMENTS_PATH)
     if args.task:
@@ -127,6 +132,7 @@ def cmd_experiments(args: argparse.Namespace) -> None:
     show(view[cols])
 
 
+# Define el argparse y despacha el subcomando.
 def main() -> None:
     parser = argparse.ArgumentParser(
         prog="python -m src.etapa2.cli",

@@ -76,12 +76,14 @@ MANUAL_CAUSES = {
 }
 
 
+# Carga todos los resultados de clasificación registrados.
 def classification_results() -> list[dict]:
     exp = load_experiments()
     rows = exp[exp["task"] == "classification"]
     return [load_stored_result(eid) for eid in rows["experiment_id"]]
 
 
+# Elige el mejor experimento de cada modelo en dev.
 def select_best_per_model(results: list[dict]) -> dict[str, dict]:
     by_model: dict[str, list[dict]] = {}
     for result in results:
@@ -101,10 +103,12 @@ def select_best_per_model(results: list[dict]) -> dict[str, dict]:
     return best
 
 
+# Elige el ganador global entre los mejores por modelo.
 def select_global(best: dict[str, dict]) -> dict:
     return max(best.values(), key=lambda r: (r["dev_macro_f1"], r["cv_macro_f1"]))
 
 
+# Convierte 'C=1; min_df=2' en parámetros de Pipeline.
 def parse_hyperparameters(text: str) -> dict:
     params = {}
     for part in text.split("; "):
@@ -114,6 +118,7 @@ def parse_hyperparameters(text: str) -> dict:
     return params
 
 
+# Reajusta la configuración con train+dev y predice test.
 def refit_on_train_dev(result: dict, df: pd.DataFrame):
     pipe = build_pipeline(
         result["model"], result["normalization"], result["representation"],
@@ -126,6 +131,7 @@ def refit_on_train_dev(result: dict, df: pd.DataFrame):
     return pipe, test, pipe.predict(test["document_id"])
 
 
+# Fila con accuracy y macro precisión, recall y F1.
 def metric_row(experiment_id, model, split, y_true, y_pred) -> dict:
     p, r, f1, _ = precision_recall_fscore_support(
         y_true, y_pred, average="macro", zero_division=0)
@@ -136,6 +142,7 @@ def metric_row(experiment_id, model, split, y_true, y_pred) -> dict:
     }
 
 
+# Filas de precisión, recall y F1 por clase.
 def per_class_rows(experiment_id, model, split, y_true, y_pred) -> list[dict]:
     p, r, f1, support = precision_recall_fscore_support(
         y_true, y_pred, labels=CLASSES, zero_division=0)
@@ -146,6 +153,7 @@ def per_class_rows(experiment_id, model, split, y_true, y_pred) -> list[dict]:
     } for i, label in enumerate(CLASSES)]
 
 
+# DataFrame de la matriz de confusión.
 def confusion_df(y_true, y_pred) -> pd.DataFrame:
     cm = confusion_matrix(y_true, y_pred, labels=CLASSES)
     return pd.DataFrame(
@@ -154,6 +162,7 @@ def confusion_df(y_true, y_pred) -> pd.DataFrame:
     )
 
 
+# Dibuja y guarda una matriz de confusión.
 def plot_confusion(cm: pd.DataFrame, title: str, path) -> None:
     fig, ax = plt.subplots(figsize=(5.2, 4.4))
     im = ax.imshow(cm.values, cmap="Blues", vmin=0)
@@ -174,6 +183,7 @@ def plot_confusion(cm: pd.DataFrame, title: str, path) -> None:
     plt.close()
 
 
+# Barras de CV y dev del mejor modelo de cada clasificador.
 def plot_best_models(best: dict[str, dict], path) -> None:
     dev = [best[m]["dev_macro_f1"] for m in MODEL_ORDER]
     cv = [best[m]["cv_macro_f1"] for m in MODEL_ORDER]
@@ -198,6 +208,7 @@ def plot_best_models(best: dict[str, dict], path) -> None:
     plt.close()
 
 
+# Línea del mejor macro-F1 acumulado por bloque.
 def plot_block_progress(results: list[dict], path) -> None:
     df = pd.DataFrame(results)
     blocks = ["C-1", "C-2", "C-3", "C-4", "C-5"]
@@ -223,6 +234,7 @@ def plot_block_progress(results: list[dict], path) -> None:
     plt.close()
 
 
+# Explica la causa probable de un error.
 def explain_error(row: pd.Series) -> str:
     if row["document_id"] in MANUAL_CAUSES:
         return MANUAL_CAUSES[row["document_id"]]
@@ -236,6 +248,7 @@ def explain_error(row: pd.Series) -> str:
     )
 
 
+# Elige 10 errores variados por par gold/predicho.
 def pick_diverse(errors: pd.DataFrame, n: int = 10) -> list[pd.Series]:
     groups = [g for _, g in errors.groupby(["gold_label", "predicted_label"], sort=True)]
     picked: list[pd.Series] = []
@@ -254,6 +267,7 @@ def pick_diverse(errors: pd.DataFrame, n: int = 10) -> list[pd.Series]:
     return picked
 
 
+# Escribe error_analysis.md con tabla y detalle.
 def write_error_analysis(dev_pred: pd.DataFrame, path, experiment_id: str,
                          model: str) -> None:
     raw = pd.read_csv(RAW_CORPUS_PATH, sep="\t", dtype=str, keep_default_na=False)
@@ -325,6 +339,7 @@ def write_error_analysis(dev_pred: pd.DataFrame, path, experiment_id: str,
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+# Ejecuta selección, test único, TSV, matrices y errores.
 def main() -> None:
     df = load_labeled()
     results = classification_results()
