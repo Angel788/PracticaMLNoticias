@@ -1,0 +1,4 @@
+cluster_id	top_words	representative_document_ids
+0	parameter, training, scale, dataset, attention, learn, representation, dense, token, target	2610.00680,2610.02258
+1	task, language, training, datum, user, improve, result, reasoning, benchmark, token	2609.39563,2609.40127
+2	video, reasoning, training, evidence, multi, task, base, retrieval, benchmark, language	2609.38473,2609.39266

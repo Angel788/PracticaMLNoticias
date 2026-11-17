@@ -1,0 +1,11 @@
+.venv/
+src/.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.pytest_cache/
+*.zip
+Etapa2/*.aux
+Etapa2/*.log
+Etapa2/*.toc
+Etapa2/*.out

@@ -1,0 +1,6 @@
+cluster_id	top_words	representative_document_ids
+0	language, training, task, datum, token, text, large, introduce, representation, image	2610.00673,2609.39801
+1	task, agent, reasoning, evidence, improve, skill, language, policy, training, base	2609.39566,2609.39154
+2	video, frame, scene, generation, visual, temporal, motion, method, state, representation	2609.40356,2609.39335
+3	retrieval, query, document, search, recommendation, base, user, retriever, large, relevance	2609.38473,2609.23718
+4	training, accuracy, target, datum, learn, score, transport, task, scale, image	2609.39934,2610.00694

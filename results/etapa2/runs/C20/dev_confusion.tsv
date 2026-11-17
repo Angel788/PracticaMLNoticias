@@ -1,0 +1,5 @@
+gold	cs.CL	cs.CV	cs.IR	cs.LG
+cs.CL	12	0	5	2
+cs.CV	4	13	1	1
+cs.IR	0	1	16	1
+cs.LG	2	1	1	15

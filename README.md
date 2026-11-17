@@ -9,6 +9,10 @@ con juicios de relevancia y la evaluación de las 12 configuraciones del modelo.
 
 **Reporte completo:** [`reporte_practica2.docx`](reporte_practica2.docx)
 
+> **Etapa II (clasificación y clustering):** el plan, el informe y las instrucciones están en
+> [`Etapa2/README.md`](Etapa2/README.md) y [`Etapa2/informe.pdf`](Etapa2/informe.pdf).
+> El resto de este documento describe la Etapa I (buscador VSM).
+
 ---
 
 ## 1. Instalación
