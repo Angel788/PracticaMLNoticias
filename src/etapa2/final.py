@@ -191,6 +191,7 @@ def plot_best_models(best: dict[str, dict], path) -> None:
 def plot_block_progress(results: list[dict], path) -> None:
     df = pd.DataFrame(results)
     blocks = ["C-1", "C-2", "C-3", "C-4", "C-5"]
+    offsets = {"MultinomialNB": (6, 10), "LogisticRegression": (6, 6), "SVC": (6, -14)}
     fig, ax = plt.subplots(figsize=(7.5, 4))
     for model in MODEL_ORDER:
         values = []
@@ -199,7 +200,7 @@ def plot_block_progress(results: list[dict], path) -> None:
             values.append(sub["dev_macro_f1"].max() if len(sub) else np.nan)
         ax.plot(blocks, values, marker="o", label=model)
         ax.annotate(f"{values[-1]:.3f}", (blocks[-1], values[-1]),
-                    textcoords="offset points", xytext=(6, 0), fontsize=8)
+                    textcoords="offset points", xytext=offsets[model], fontsize=8)
     ax.set_ylim(0.68, 0.82)
     ax.set_ylabel("macro-F1 en dev")
     ax.set_title("Mejor macro-F1 en dev acumulado por bloque", loc="left", fontsize=11)
