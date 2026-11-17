@@ -223,7 +223,15 @@ C3_REFERENCE = {
 }
 C3_IDS = [f"C{i:02d}" for i in range(10, 16)]   # C10-C15
 C4_IDS = [f"C{i:02d}" for i in range(16, 22)]   # C16-C21
-C5_IDS = [f"C{i:02d}" for i in range(22, 26)]   # C22-C25
+C5_IDS = [f"C{i:02d}" for i in range(22, 30)]   # C22-C29
+
+
+C5_COMPLEMENT = [
+    ("C26", "LogisticRegression", "N2", (1, 1), 100, "C02"),
+    ("C27", "LogisticRegression", "N2", (1, 1), 200, "C02"),
+    ("C28", "LogisticRegression", "N2", (1, 1), 50, "C02"),
+    ("C29", "SVC", "N0", (1, 1), 50, "C06"),
+]
 
 
 def load_stored_result(experiment_id: str) -> dict:
@@ -333,6 +341,28 @@ def run_block_c5(df=None, best_c4=None) -> list[dict]:
     return results
 
 
+def run_block_c5_complement(df=None) -> list[dict]:
+    """Complemento de C-5: SVD sobre la configuración final de cada modelo.
+
+    C22-C25 prueban SVD sobre la mejor configuración de C-4; para LR eso son
+    bigramas (C18), pero el modelo que llega a la selección final es C02
+    (unigramas). Faltaba comprobar si el SVD ayuda a esa configuración. Se
+    añaden 50, 100 y 200 componentes para LR y 50 para SVC (100 y 200 ya están
+    en C24-C25). Son 4 experimentos nuevos: C26-C29.
+    """
+    df = load_labeled() if df is None else df
+    results = []
+    for experiment_id, model, normalization, ngram_range, svd, reference in C5_COMPLEMENT:
+        results.append(run_experiment(
+            experiment_id, "C-5", model,
+            normalization=normalization, representation="tfidf",
+            ngram_range=ngram_range, svd_components=svd, df=df,
+            notes=(f"C-5 complementario: SVD {svd} sobre {reference} "
+                   f"({'unigramas' if ngram_range == (1, 1) else 'bigramas'})"),
+        ))
+    return results
+
+
 def run_from_registry(block: str) -> list[dict]:
     """Ejecuta C-4 o C-5 leyendo del registro el mejor resultado del bloque anterior."""
     df = load_labeled()
@@ -342,7 +372,8 @@ def run_from_registry(block: str) -> list[dict]:
         return run_block_c4(df, best_c3)
     if block == "C-5":
         c4_results = load_results(C4_IDS + [best_c3[m]["experiment_id"] for m in MODELS])
-        return run_block_c5(df, best_per_model(c4_results))
+        return (run_block_c5(df, best_per_model(c4_results))
+                + run_block_c5_complement(df))
     raise ValueError(f"Bloque no soportado desde el registro: {block}")
 
 

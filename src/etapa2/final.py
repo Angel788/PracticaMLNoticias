@@ -38,6 +38,16 @@ CONFUSION_DIR = RESULTS_DIR / "confusion_matrices"
 TIE_THRESHOLD = 0.01
 MODEL_ORDER = ["MultinomialNB", "LogisticRegression", "SVC"]
 
+# Selección congelada en dev antes de la evaluación final en test. El bloque
+# C-5 se complementó después con C26-C29: C29 (SVC + SVD 50) mejora dev
+# (0.7880) pero tiene CV menor (0.7040) y no se re-evaluó en test. Para que
+# este script reproduzca el informe, se fija la selección original.
+FROZEN_SELECTION = {
+    "MultinomialNB": "C07",
+    "LogisticRegression": "C02",
+    "SVC": "C06",
+}
+
 PAIR_CAUSE = {
     ("cs.CL", "cs.LG"): "frontera difusa LLM/ML: comparten transformer, training, model, language",
     ("cs.LG", "cs.CL"): "frontera difusa ML/LLM: el abstract usa vocabulario de lenguaje",
@@ -318,7 +328,8 @@ def write_error_analysis(dev_pred: pd.DataFrame, path, experiment_id: str,
 def main() -> None:
     df = load_labeled()
     results = classification_results()
-    best = select_best_per_model(results)
+    best = {model: load_stored_result(eid)
+            for model, eid in FROZEN_SELECTION.items()}
     winner = select_global(best)
 
     for model in MODEL_ORDER:
@@ -389,7 +400,10 @@ def main() -> None:
 
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
     plot_best_models(best, FIGURES_DIR / "classification_best_dev.png")
-    plot_block_progress(results, FIGURES_DIR / "classification_blocks_dev.png")
+    # La figura de bloques usa la corrida original C01-C25; C26-C29 es el
+    # complemento post-hoc de C-5 y se reporta en la Tabla 6 del informe.
+    original = [r for r in results if int(r["experiment_id"][1:]) <= 25]
+    plot_block_progress(original, FIGURES_DIR / "classification_blocks_dev.png")
     write_error_analysis(
         dev_pred[dev_pred["experiment_id"] == winner["experiment_id"]],
         RESULTS_DIR / "error_analysis.md", winner["experiment_id"], winner["model"],

@@ -55,7 +55,9 @@ hiperparámetros solo en train y selección por macro-F1 en dev. La mejor config
 LogisticRegression con normalización N2, TF-IDF de unigramas y \code{min\_df=1}: macro-F1
 0.799 en dev y 0.761 en test. TF-IDF superó a las representaciones binaria y de frecuencia;
 la lematización ayudó a MultinomialNB; los bigramas, los trigramas y el SVD no aportaron
-mejoras materiales. El análisis de 10 errores de dev muestra que la frontera
+mejoras materiales a LR. En SVC, SVD 50 subió 1.4 puntos en dev pero con CV menor y se
+añadió después de congelar la selección, así que no se usó en test. El análisis de 10
+errores de dev muestra que la frontera
 \code{cs.CL}--\code{cs.LG}, el vocabulario de recuperación y la etiqueta primaria de arXiv
 explican la mayor parte de las confusiones.
 
@@ -85,7 +87,7 @@ El proyecto tiene dos tareas:
 \end{itemize}
 
 Las contribuciones principales son: (i) una partición reproducible 70/15/15 fijada antes
-de ajustar cualquier transformación; (ii) 25 experimentos de clasificación y 16 de
+de ajustar cualquier transformación; (ii) 29 experimentos de clasificación y 16 de
 clustering registrados en \code{experiments.tsv}; (iii) los entregables de predicciones,
 métricas por clase, matrices de confusión y clusters; (iv) una interfaz de consulta; y
 (v) este informe, con análisis de errores y limitaciones.
@@ -206,7 +208,7 @@ quedaría igual que N1 y el experimento de normalización no mediría nada.
 \subsection{Representaciones y modelos}
 Se compararon tres representaciones: binaria (\code{CountVectorizer(binary=True)}),
 frecuencia (\code{CountVectorizer()}) y TF-IDF. Los n-gramas fueron (1,1), (1,2) y (1,3).
-El SVD se probó con 100 y 200 componentes, siempre dentro del \code{Pipeline}. Los
+El SVD se probó con 50, 100 y 200 componentes, siempre dentro del \code{Pipeline}. Los
 clasificadores fueron MultinomialNB, LogisticRegression y SVC lineal. MultinomialNB nunca
 se combinó con SVD porque el SVD produce valores negativos.
 
@@ -234,7 +236,7 @@ C-1 & Clasificador: NB, LR, SVC & N2, TF-IDF (1,1), sin SVD & C01--C03\\
 C-2 & Normalización: N0, N1, N2 & TF-IDF (1,1), sin SVD & C01--C09\\
 C-3 & Representación: binaria, frecuencia, TF-IDF & mejor normalización por modelo & C02, C06, C07, C10--C15\\
 C-4 & N-gramas: (1,1), (1,2), (1,3) & mejor representación & C02, C06, C07, C16--C21\\
-C-5 & SVD: 100, 200 & mejor configuración, solo LR y SVC & C22--C25\\
+C-5 & SVD: 50, 100, 200 & mejor configuración y configuración final & C22--C29\\
 \midrule
 K-1 & $k \in \{3,4,5,6,8\}$ & N2, TF-IDF (1,1), SVD 100 & K01--K05\\
 K-2 & Normalización & mejor $k$ & K01, K06, K07\\
@@ -299,6 +301,7 @@ abstracts y sube el de los que distinguen un área.
 \small
 \caption{C-3, C-4 y C-5: macro-F1 en dev de las configuraciones nuevas.}
 \label{tab:c3c5}
+\footnotesize
 \begin{tabular}{@{}llrrrr@{}}
 \toprule
 Modelo & Alternativa & Exp. & Dev macro-F1 & CV macro-F1 & ¿Mejora?\\
@@ -312,36 +315,47 @@ LogisticRegression & binaria & C12 & 0.7445 & 0.7437 & no\\
 LogisticRegression & frecuencia & C13 & 0.7457 & 0.7326 & no\\
 LogisticRegression & bigramas & C18 & 0.8007 & 0.7656 & empate\\
 LogisticRegression & trigramas & C19 & 0.7751 & 0.7672 & no\\
-LogisticRegression & SVD 100 & C22 & 0.7573 & 0.7654 & no\\
-LogisticRegression & SVD 200 & C23 & 0.7713 & 0.7849 & no\\
+LogisticRegression & SVD 100 (C18) & C22 & 0.7573 & 0.7654 & no\\
+LogisticRegression & SVD 200 (C18) & C23 & 0.7713 & 0.7849 & no\\
+LogisticRegression & SVD 50 (C02) & C28 & 0.7706 & 0.7411 & no\\
+LogisticRegression & SVD 100 (C02) & C26 & 0.7586 & 0.7601 & no\\
+LogisticRegression & SVD 200 (C02) & C27 & 0.7475 & 0.7653 & no\\
 \midrule
 SVC & binaria & C14 & 0.7466 & 0.7081 & no\\
 SVC & frecuencia & C15 & 0.6624 & 0.6532 & no\\
 SVC & bigramas & C20 & 0.7458 & 0.7386 & no\\
 SVC & trigramas & C21 & 0.7566 & 0.7218 & no\\
-SVC & SVD 100 & C24 & 0.7504 & 0.7319 & no\\
-SVC & SVD 200 & C25 & 0.7751 & 0.7302 & empate\\
+SVC & SVD 50 (C06) & C29 & 0.7880 & 0.7040 & sí en dev\\
+SVC & SVD 100 (C06) & C24 & 0.7504 & 0.7319 & no\\
+SVC & SVD 200 (C06) & C25 & 0.7751 & 0.7302 & empate\\
 \bottomrule
 \end{tabular}
 \end{table}
 
 Los bigramas y trigramas no aportaron una mejora material. LR con bigramas obtuvo 0.8007
 frente a 0.7993 de unigramas (0.0014, una décima de documento) y con trigramas bajó a
-0.7751; NB y SVC empeoraron. El SVD tampoco ayudó: LR bajó de 0.7993 a 0.7573 (SVD 100) y
-0.7713 (SVD 200), y SVC quedó en 0.7504 y 0.7751. La única mejora aparente, SVC con SVD
-200 (+0.0009), es un empate y tiene menor CV (0.7302 frente a 0.7451).
+0.7751; NB y SVC empeoraron. El SVD no ayudó a LR: sobre la configuración de C-4 (bigramas,
+C18) dio 0.7573 con 100 componentes y 0.7713 con 200; sobre la configuración final C02
+(unigramas) dio 0.7706 con 50, 0.7586 con 100 y 0.7475 con 200, todos por debajo de
+0.7993. En SVC, SVD 100/200 quedó en 0.7504/0.7751; el complemento con SVD 50 (C29) subió
+a 0.7880 en dev (+1.4 puntos, poco más de un documento), pero su CV bajó a 0.7040 frente a
+0.7451 de C06. C29 se añadió después de congelar la selección y de evaluar test; por el
+protocolo de test único no se re-evaluó, así que se mantiene C06 como SVC de referencia y
+C29 queda como línea para un test independiente.
 
 \subsection{Selección en dev y evaluación final}
 La Tabla~\ref{tab:seleccion} resume el mejor experimento de cada modelo. En LR, C18
 (0.8007) y C02 (0.7993) están empatados; se eligió C02 por mayor CV (0.7675 frente a
 0.7656) y por ser más simple (unigramas). En SVC, C25 (0.7751) y C06 (0.7742) también
 están empatados; se eligió C06 por mayor CV (0.7451 frente a 0.7302) y por no usar SVD. El
-ganador global fue C02.
+ganador global fue C02. El complemento C29 (SVC + SVD 50) llegó a 0.7880 en dev, por
+encima de C06, pero se añadió después de congelar la selección y de evaluar test; con CV
+0.7040 frente a 0.7451 se mantiene C06. C29 queda como línea para un test independiente.
 
 \begin{table}[htbp]
 \centering
 \small
-\caption{Mejor configuración por clasificador y evaluación final.}
+\caption{Configuración seleccionada por clasificador y evaluación final (la selección se congeló antes de test).}
 \label{tab:seleccion}
 \begin{tabular}{@{}llrrr@{}}
 \toprule
@@ -414,7 +428,7 @@ en test 0.579.
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.78\linewidth]{classification_blocks_dev.png}
-\caption{Mejor macro-F1 en dev acumulado por bloque.}
+\caption{Mejor macro-F1 en dev acumulado por bloque (experimentos originales C01--C25; el complemento C26--C29 se detalla en la Tabla~\ref{tab:c3c5}).}
 \label{fig:bloques}
 \end{figure}
 
@@ -660,7 +674,7 @@ python -m src.etapa2.classify C-1    # C01-C03
 python -m src.etapa2.classify C-2    # C04-C09 (reutiliza C01-C03)
 python -m src.etapa2.classify C-3    # C10-C15
 python -m src.etapa2.classify C-4    # C16-C21
-python -m src.etapa2.classify C-5    # C22-C25
+python -m src.etapa2.classify C-5    # C22-C29
 python -m src.etapa2.final           # selección, test y TSV de entrega
 python -m src.etapa2.cluster         # K-1 a K-6 y clustering_results.tsv
 python -m src.etapa2.cli metrics     # consulta de resultados
@@ -684,7 +698,7 @@ Archivo & Contenido\\
 \midrule
 \code{data/etapa2/labeled\_documents.tsv} & document\_id, text, label, split, categories\\
 \code{data/etapa2/normalized\_variants.tsv} & Caché N0/N1/N2\\
-\code{results/etapa2/experiments.tsv} & 41 experimentos (25 de clasificación, 16 de clustering)\\
+\code{results/etapa2/experiments.tsv} & 45 experimentos (29 de clasificación, 16 de clustering)\\
 \code{results/etapa2/}\newline\code{classification\_predictions.tsv} & Predicciones de dev (mejor por modelo) y test\\
 \code{results/etapa2/}\newline\code{classification\_metrics.tsv} & Accuracy, macro P/R/F1 por split\\
 \code{results/etapa2/}\newline\code{classification\_per\_class.tsv} & Métricas por clase\\
@@ -720,8 +734,9 @@ dev y 0.761 en test. La regularización y el vocabulario compacto son suficiente
 falta SVD.
 \item La normalización importa de forma desigual: NB gana 7 puntos con N1, LR gana 4 con
 N2 y SVC es casi insensible. No hay una normalización universal.
-\item Los bigramas, trigramas y el SVD no mejoran de forma material; la representación
-TF-IDF ya captura la señal útil con 350 documentos.
+\item Los bigramas, trigramas y el SVD no mejoran de forma material a LR; en SVC, SVD 50
+sube 1.4 puntos en dev pero con CV menor y se añadió después del test, así que no se
+seleccionó. La representación TF-IDF ya captura la señal útil con 350 documentos.
 \item K-Means encuentra cuatro clusters interpretables (NLP/agentes, IR/recomendación,
 visión/vídeo, ML) con ARI 0.372 y NMI 0.486 en test, aunque su silhouette es bajo. El
 silhouette más alto no era el más útil: separaba formato, no temas.
@@ -748,7 +763,8 @@ Clasificación / NB & N1 & TF-IDF (1,1) & alpha=0.1; min\_df=2 & 0.7745 & Mejor 
 Clasificación / LR & N2 & TF-IDF (1,1) & C=1; min\_df=1 & 0.7993 & Ganador global; test 0.761\\
 Clasificación / SVC & N0 & TF-IDF (1,1) & C=10; min\_df=1 & 0.7742 & Mejor SVC\\
 Clasificación / LR & N2 & TF-IDF (1,2) & C=1; min\_df=2 & 0.8007 & Empate con C02; no se elige\\
-Clasificación / LR & N2 & TF-IDF (1,2)+SVD 200 & C=1; min\_df=2 & 0.7713 & SVD no ayuda\\
+Clasificación / LR & N2 & TF-IDF (1,1)+SVD 50/100/200 & C=10/1; min\_df=2 & 0.7706 & C26-C28 < C02; SVD no ayuda\\
+Clasificación / SVC & N0 & TF-IDF (1,1)+SVD 50 & C=10; min\_df=2 & 0.7880 & Dev; CV 0.704; no elegido\\
 Clustering / K-Means & N2 & TF-IDF (1,1)+SVD 100 & k=4; k-means++; n\_init=10 & 0.0660 & Silhouette dev; test 0.083\\
 Clustering / K-Means & N0 & frecuencia (1,2)+SVD 50 & k=3; random; n\_init=20 & 0.2085 & Silhouette alto, clusters de formato\\
 \bottomrule

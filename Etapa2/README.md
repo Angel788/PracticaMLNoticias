@@ -32,6 +32,10 @@ datos y los resultados viven en la raíz del repositorio (`src/etapa2/`, `data/e
   visión/vídeo y ML general). Las configuraciones con silhouette más alto separaban
   artefactos de formato (LaTeX, números), no temas; por eso la selección final combinó
   silhouette en dev con interpretabilidad.
+- **C-5 complementario (C26-C29):** SVD 50/100/200 sobre la configuración final C02 no
+  mejora LR (0.7706/0.7586/0.7475 frente a 0.7993). En SVC, SVD 50 (C29) sube a 0.7880
+  en dev, pero con CV 0.7040 frente a 0.7451 y añadido después de evaluar test; se mantiene
+  C06 y C29 queda como línea para un test independiente.
 
 ## Reproducir
 
@@ -49,7 +53,7 @@ python -m src.etapa2.classify C-1    # C01-C03
 python -m src.etapa2.classify C-2    # C04-C09 (reutiliza C01-C03)
 python -m src.etapa2.classify C-3    # C10-C15
 python -m src.etapa2.classify C-4    # C16-C21
-python -m src.etapa2.classify C-5    # C22-C25
+python -m src.etapa2.classify C-5    # C22-C29
 python -m src.etapa2.final           # selección, test único y TSV de entrega
 python -m src.etapa2.cluster         # K-1 a K-6 y clustering_results.tsv
 ```
@@ -81,7 +85,7 @@ pdflatex informe.tex   # segunda pasada para el índice
 
 | Archivo | Contenido |
 |---|---|
-| `../results/etapa2/experiments.tsv` | 41 experimentos (25 de clasificación, 16 de clustering) |
+| `../results/etapa2/experiments.tsv` | 45 experimentos (29 de clasificación, 16 de clustering) |
 | `../results/etapa2/classification_predictions.tsv` | Predicciones de dev (mejor por modelo) y test |
 | `../results/etapa2/classification_metrics.tsv` | Accuracy, macro P/R/F1 por split |
 | `../results/etapa2/classification_per_class.tsv` | Métricas por clase |
