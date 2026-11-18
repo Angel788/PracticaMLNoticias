@@ -1,0 +1,39 @@
+{
+  "classifier": {
+    "experiment": "C02",
+    "normalization": "N2",
+    "representation": "tfidf",
+    "ngram_range": [
+      1,
+      1
+    ],
+    "C": 1.0,
+    "min_df": 1,
+    "dev_macro_f1": 0.7993,
+    "test_macro_f1": 0.761
+  },
+  "kmeans": {
+    "experiment": "K02",
+    "normalization": "N2",
+    "representation": "tfidf",
+    "ngram_range": [
+      1,
+      1
+    ],
+    "svd_components": 100,
+    "k": 4,
+    "init": "k-means++",
+    "n_init": 10,
+    "max_iter": 300,
+    "test_silhouette": 0.0829,
+    "test_ari": 0.3719,
+    "test_nmi": 0.486
+  },
+  "versions": {
+    "python": "3.14.7",
+    "numpy": "2.5.4",
+    "pandas": "3.0.6",
+    "scikit_learn": "1.9.1"
+  },
+  "random_state": 0
+}

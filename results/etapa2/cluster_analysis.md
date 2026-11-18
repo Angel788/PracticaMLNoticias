@@ -60,3 +60,8 @@ Dentro de N2 + TF-IDF (1,1) + SVD 100, **K02** (k=4) tiene silhouette dev 0.0660
 | K-6 | K16 | 3 | 0.2085 |
 
 La estabilidad de K02 es moderada (0.234); las configuraciones con estabilidad casi perfecta también son las que separan formato, no temas. El silhouette de texto es bajo por naturaleza.
+
+## K-3 binaria (K17)
+- Se añadió la representación binaria para completar las tres opciones de K-3.
+- Silhouette dev 0.0477, ARI dev -0.0038, estabilidad 0.415.
+- No mejora a TF-IDF (0.0660/0.3755) ni a frecuencia en silhouette; los clusters no se alinean con las categorías.

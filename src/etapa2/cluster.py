@@ -314,6 +314,18 @@ def run_block_k3(df=None, best_k2=None) -> list[dict]:
 
 
 # Corre K-4: bigramas vs unigramas con la mejor representación.
+# Corre K-3 complementario: representación binaria con el mejor k y normalización.
+def run_block_k3_binary(df=None, best_k2=None) -> list[dict]:
+    df = load_labeled() if df is None else df
+    return [run_kmeans(
+        "K17", "K-3", best_k2["k"], normalization=best_k2["normalization"],
+        representation="binary", ngram_range=(1, 1), svd_components=100,
+        df=df,
+        notes=(f"K-3 complementario: binaria con {best_k2['normalization']}, "
+               f"k={best_k2['k']}; TF-IDF es {best_k2['experiment_id']}"),
+    )]
+
+
 def run_block_k4(df=None, best_k3=None) -> list[dict]:
     df = load_labeled() if df is None else df
     return [run_kmeans(
@@ -569,6 +581,7 @@ def run_all(df=None) -> dict:
     k2 = run_block_k2(df, best1)
     best2 = choose_best(k2 + [best1])
     k3 = run_block_k3(df, best2)
+    k3b = run_block_k3_binary(df, best2)
     best3 = choose_best(k3 + [best2])
     k4 = run_block_k4(df, best3)
     best4 = choose_best(k4 + [best3])
@@ -619,6 +632,10 @@ def run_all(df=None) -> dict:
             fh.write(f"| {name} | {b['experiment_id']} | {b['k']} | "
                      f"{b['dev_silhouette']:.4f} |\n")
         fh.write(
+            f"\n- K-3 binaria (K17): silhouette dev {k3b[0]['dev_silhouette']:.4f}, "
+            f"ARI {k3b[0]['ari_dev']:.4f}; no mejora a TF-IDF.\n"
+        )
+        fh.write(
             f"\nLa estabilidad de {SELECTED_FINAL} es moderada "
             f"({best_final['stability_ari']:.3f}); las configuraciones con "
             "estabilidad casi perfecta también son las que separan formato, "
@@ -626,7 +643,7 @@ def run_all(df=None) -> dict:
         )
 
     return {
-        "k1": k1, "k2": k2, "k3": k3, "k4": k4, "k5": k5, "k6": k6,
+        "k1": k1, "k2": k2, "k3": k3, "k3b": k3b, "k4": k4, "k5": k5, "k6": k6,
         "best1": best1, "best2": best2, "best3": best3,
         "best4": best4, "best5": best5, "best6": best6,
         "best_final": best_final, "final": final,

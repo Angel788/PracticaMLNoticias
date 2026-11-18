@@ -87,7 +87,7 @@ El proyecto tiene dos tareas:
 \end{itemize}
 
 Las contribuciones principales son: (i) una partición reproducible 70/15/15 fijada antes
-de ajustar cualquier transformación; (ii) 29 experimentos de clasificación y 16 de
+de ajustar cualquier transformación; (ii) 29 experimentos de clasificación y 17 de
 clustering registrados en \code{experiments.tsv}; (iii) los entregables de predicciones,
 métricas por clase, matrices de confusión y clusters; (iv) una interfaz de consulta; y
 (v) este informe, con análisis de errores y limitaciones.
@@ -240,7 +240,7 @@ C-5 & SVD: 50, 100, 200 & mejor configuración y configuración final & C22--C29
 \midrule
 K-1 & $k \in \{3,4,5,6,8\}$ & N2, TF-IDF (1,1), SVD 100 & K01--K05\\
 K-2 & Normalización & mejor $k$ & K01, K06, K07\\
-K-3 & Frecuencia vs TF-IDF & mejor normalización & K08 + referencia\\
+K-3 & Binaria, frecuencia, TF-IDF & mejor normalización & K08, K17 + referencia\\
 K-4 & (1,1) vs (1,2) & mejor representación & K09 + referencia\\
 K-5 & SVD: sin SVD, 50, 100, 200 & mejor configuración & K10--K12 + referencia\\
 K-6 & \code{init}, \code{n\_init}, \code{max\_iter} & mejor configuración & K13--K16 + referencia\\
@@ -565,6 +565,10 @@ K-6 (K-Means) & K16 (random, 20, 500) & 3 & 0.2085 & 0.0427\\
 \end{tabular}
 \end{table}
 
+También se probó la representación binaria en K-3 (K17): silhouette dev 0.0477, ARI
+$-$0.0038 y estabilidad 0.415. No mejora a TF-IDF (0.0660/0.3755) ni a frecuencia
+(0.1727/0.0427); se añadió como complemento para cubrir las tres representaciones.
+
 \subsection{Configuración final}
 La configuración final es \textbf{K02}: $k=4$, N2, TF-IDF (1,1), SVD 100,
 \code{init="k-means++"}, \code{n\_init=10}, \code{max\_iter=300}, \code{random\_state=0}.
@@ -654,6 +658,13 @@ Comando & Qué muestra\\
 \end{tabular}
 \end{table}
 
+Además del CLI, se incluye una interfaz web opcional
+(\code{python -m src.etapa2.api}, puerto 8001) que clasifica un texto nuevo, muestra
+probabilidades y el cluster asignado, y expone las métricas, matrices, clusters y
+experimentos. Los modelos finales también se guardan en \code{models/etapa2/}
+(\code{classifier\_c02.pkl}, \code{kmeans\_k02.pkl} y \code{metadata.json}) para
+reutilizarlos con \code{joblib.load}.
+
 \section{Reproducibilidad}
 
 \subsection{Versiones y semillas}
@@ -698,7 +709,7 @@ Archivo & Contenido\\
 \midrule
 \code{data/etapa2/labeled\_documents.tsv} & document\_id, text, label, split, categories\\
 \code{data/etapa2/normalized\_variants.tsv} & Caché N0/N1/N2\\
-\code{results/etapa2/experiments.tsv} & 45 experimentos (29 de clasificación, 16 de clustering)\\
+\code{results/etapa2/experiments.tsv} & 46 experimentos (29 de clasificación, 17 de clustering)\\
 \code{results/etapa2/}\newline\code{classification\_predictions.tsv} & Predicciones de dev (mejor por modelo) y test\\
 \code{results/etapa2/}\newline\code{classification\_metrics.tsv} & Accuracy, macro P/R/F1 por split\\
 \code{results/etapa2/}\newline\code{classification\_per\_class.tsv} & Métricas por clase\\
@@ -707,6 +718,8 @@ Archivo & Contenido\\
 \code{results/etapa2/clustering\_results.tsv} & document\_id, split, cluster\_id, configuration\\
 \code{results/etapa2/cluster\_summary.tsv} & Tamaño, top-10 palabras y representativos\\
 \code{results/etapa2/cluster\_analysis.md} & Selección e interpretación de K-Means\\
+\code{models/etapa2/} & classifier\_c02.pkl, kmeans\_k02.pkl y metadata.json\\
+\code{src/etapa2/api.py} & Interfaz web opcional (puerto 8001)\\
 \code{src/etapa2/} & Módulos de la Etapa II y CLI\\
 \bottomrule
 \end{tabular}

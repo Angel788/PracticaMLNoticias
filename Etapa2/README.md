@@ -8,7 +8,7 @@ datos y los resultados viven en la raíz del repositorio (`src/etapa2/`, `data/e
 
 | Archivo | Qué es |
 |---|---|
-| `informe.pdf` | Informe final de la Etapa II (17 páginas). |
+| `informe.pdf` | Informe final de la Etapa II (18 páginas). |
 | `informe.tex` | Fuente LaTeX del informe. |
 | `plan_de_trabajo.md` | Plan de trabajo completo (5 fases, reparto y checklist). |
 | `Plan de trabajo — Proyecto Etapa II (equipo de 2).md` | Versión corta del plan. |
@@ -32,6 +32,8 @@ datos y los resultados viven en la raíz del repositorio (`src/etapa2/`, `data/e
   visión/vídeo y ML general). Las configuraciones con silhouette más alto separaban
   artefactos de formato (LaTeX, números), no temas; por eso la selección final combinó
   silhouette en dev con interpretabilidad.
+- **K-3 binaria (K17):** se añadió para completar las tres representaciones de K-Means;
+  silhouette dev 0.0477 y ARI $-0.0038$, no mejora a TF-IDF.
 - **C-5 complementario (C26-C29):** SVD 50/100/200 sobre la configuración final C02 no
   mejora LR (0.7706/0.7586/0.7475 frente a 0.7993). En SVC, SVD 50 (C29) sube a 0.7880
   en dev, pero con CV 0.7040 frente a 0.7451 y añadido después de evaluar test; se mantiene
@@ -48,6 +50,7 @@ Los notebooks leen los resultados ya congelados (no vuelven a usar test):
 | `../notebooks/11_etapa2_C5_svd.ipynb` | C-5: SVD 50/100/200 y complemento C26--C29 |
 | `../notebooks/12_etapa2_fase3_seleccion_test.ipynb` | Fase 3: selección, 10 errores y test |
 | `../notebooks/13_etapa2_kmeans.ipynb` | K-Means: K-1 a K-6, clusters y contingencia |
+| `../notebooks/14_etapa2_modelos_finales.ipynb` | Selección paso a paso y guardado de los modelos finales |
 
 ## Reproducir
 
@@ -75,6 +78,19 @@ Los bloques C-4 y C-5 leen el mejor resultado del bloque anterior desde
 deterministas: todas las semillas son 0 (`random_state=0` en splits, SVD, modelos y
 K-Means; `StratifiedKFold(5, shuffle=True, random_state=0)`).
 
+### Interfaz web
+
+```bash
+python -m src.etapa2.api      # desde la raíz; desde Etapa2/: python ../src/etapa2/api.py
+```
+
+Clasifica un título + abstract nuevo con el modelo final (C02 reajustado con train+dev),
+muestra las probabilidades por categoría, las palabras que más pesaron y el cluster de
+K-Means asignado. Debajo están las métricas, las matrices de confusión, los clusters y el
+registro de experimentos. El botón «Cargar un artículo de test» permite comparar la
+predicción con la categoría real. Al arrancar se reajustan los dos modelos (unos
+segundos); sus predicciones coinciden con las de `results/etapa2/`.
+
 ### Consultar resultados
 
 ```bash
@@ -93,11 +109,24 @@ pdflatex informe.tex
 pdflatex informe.tex   # segunda pasada para el índice
 ```
 
+## Modelos finales
+
+Los dos modelos ya ajustados con train+dev quedan en `../models/etapa2/`:
+
+| Archivo | Contenido |
+|---|---|
+| `../models/etapa2/classifier_c02.pkl` | Pipeline TF-IDF + LogisticRegression(C=1) |
+| `../models/etapa2/kmeans_k02.pkl` | Pipeline TF-IDF + SVD 100 + L2 + KMeans(k=4) |
+| `../models/etapa2/metadata.json` | Configuración, métricas y versiones |
+
+Los pipelines guardados reciben **texto ya normalizado**; para texto nuevo, normaliza
+primero con `normalize_doc`. El notebook 14 muestra cómo cargarlos con `joblib.load`.
+
 ## Archivos de resultados
 
 | Archivo | Contenido |
 |---|---|
-| `../results/etapa2/experiments.tsv` | 45 experimentos (29 de clasificación, 16 de clustering) |
+| `../results/etapa2/experiments.tsv` | 46 experimentos (29 de clasificación, 17 de clustering) |
 | `../results/etapa2/classification_predictions.tsv` | Predicciones de dev (mejor por modelo) y test |
 | `../results/etapa2/classification_metrics.tsv` | Accuracy, macro P/R/F1 por split |
 | `../results/etapa2/classification_per_class.tsv` | Métricas por clase |
