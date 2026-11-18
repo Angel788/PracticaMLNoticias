@@ -42,8 +42,8 @@ datos y los resultados viven en la raíz del repositorio (`src/etapa2/`, `data/e
 ## Notebook único
 
 [`../notebooks/00_etapa2_completo.ipynb`](../notebooks/00_etapa2_completo.ipynb) recorre
-la historia completa en un solo archivo: datos, bloques C-1 a C-5, K-Means, test, clusters
-y guardado de los modelos finales. Lee los resultados congelados, no vuelve a usar test.
+la historia completa en un solo archivo, con tablas y lectura de cada bloque: C-1 a C-5,
+K-1 a K-6 (incluida la binaria K17), test, clusters y guardado de los modelos finales. Lee los resultados congelados, no vuelve a usar test.
 
 Los notebooks 06--14 anteriores se conservan en la rama `etapa2`; esta rama deja solo el
 notebook único para no hacer la entrega tan pesada.
