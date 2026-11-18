@@ -107,13 +107,19 @@ class Models:
         top = sorted(zip(idx, contrib), key=lambda t: -t[1])[:8]
         terms = [{"term": names[i], "weight": float(w)} for i, w in top if w > 0]
 
-        cluster = int(self.km.predict([norm])[0])
+        # Distancia euclídea a cada centroide en el espacio SVD + L2 (predict elige la menor).
+        # Cercanía = 1 − d/2, en [0, 1] porque el vector es unitario y ‖centroide‖ ≤ 1.
+        dist = self.km.transform([norm])[0]
+        cluster = int(np.argmin(dist))
+        closeness = [{"id": i, "name": CLUSTER_NAMES[i], "distance": float(d),
+                      "closeness": float(max(0.0, 1 - d / 2))}
+                     for i, d in enumerate(dist)]
         return {
             "prediction": best,
             "probabilities": [{"label": c, "p": float(proba[order.index(c)])}
                               for c in CLASSES],
             "terms": terms,
-            "cluster": {"id": cluster, "name": CLUSTER_NAMES[cluster]},
+            "cluster": {"id": cluster, "name": CLUSTER_NAMES[cluster], "closeness": closeness},
             "normalized": norm,
             "known_terms": int(x.nnz),
         }

@@ -115,7 +115,16 @@
   .why h3 { margin-top: 0; }
   .terms { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 20px; padding: 0; list-style: none; }
   .terms li { padding: 3px 10px; border-radius: 999px; font-size: 14px; }
-  .cluster-line { font-size: 15px; margin: 0 0 14px; }
+  .unsup { border-top: 2px solid var(--ink); padding-top: 18px; margin: 4px 0 20px; }
+  .unsup .kicker { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+                   color: var(--ink-2); margin-bottom: 6px; }
+  .unsup .winner .code { font-size: clamp(44px, 6vw, 64px); }
+  .unsup .winner .name { font-size: 20px; color: var(--ink); font-weight: 700; }
+  .unsup .bars { margin-bottom: 8px; }
+  .b.k { grid-template-columns: minmax(0, 170px) 1fr 44px; }
+  .b.k .lab { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .b.k .fill { background: var(--ink-2); }
+  .b.k.top .fill { background: var(--ink); }
   details summary { cursor: pointer; color: var(--ink-2); font-size: 14px; }
   details p { font: 400 14px/1.6 "Literata", Georgia, serif; color: var(--ink-2); margin: 8px 0 0; }
   .error { color: var(--warn); }
@@ -317,6 +326,29 @@ form.addEventListener("submit", async e => {
   }
 });
 
+function renderCluster(c) {
+  const sorted = [...c.closeness].sort((a, b) => b.closeness - a.closeness);
+  const gap = sorted[0].closeness - sorted[1].closeness;
+  const note = gap < 0.03
+    ? `Queda casi en la frontera con el cluster ${sorted[1].id}, ${esc(sorted[1].name)}.`
+    : `Está claramente más cerca de este centroide que de los demás.`;
+  return `
+    <div class="unsup">
+      <div class="kicker">No supervisado · K-Means (k = 4)</div>
+      <div class="winner"><span class="code">${c.id}</span><span class="name">${esc(c.name)}</span></div>
+      <p class="gold">${note} <a href="#cluster-${c.id}">Ver el cluster</a></p>
+      <div class="bars">${sorted.map((s, i) => `
+        <div class="b k ${i === 0 ? "top" : ""}">
+          <span class="lab">${s.id}. ${esc(s.name)}</span>
+          <div class="track"><div class="fill" data-w="${(s.closeness * 100).toFixed(1)}"></div></div>
+          <span class="pct">${s.closeness.toFixed(2)}</span>
+        </div>`).join("")}
+      </div>
+      <p class="axis">Cercanía al centroide (1 − distancia / 2) en el espacio TF-IDF + SVD 100.
+        No es una probabilidad: K-Means asigna el más cercano y no ve las etiquetas.</p>
+    </div>`;
+}
+
 function render(d) {
   const k = CLASS[d.prediction];
   const sorted = [...d.probabilities].sort((a, b) => b.p - a.p);
@@ -339,8 +371,9 @@ function render(d) {
     <div class="why">
       <h3>Palabras que más empujaron hacia ${d.prediction}</h3>
       <ul class="terms c-${k}">${d.terms.map(t => `<li class="soft-c">${esc(t.term)}</li>`).join("") || "<li>ninguna destacada</li>"}</ul>
-      <p class="cluster-line">K-Means lo pone en el cluster ${d.cluster.id}, <strong>${esc(d.cluster.name)}</strong>.
-        <a href="#cluster-${d.cluster.id}">Ver el cluster</a></p>
+    </div>
+    ${renderCluster(d.cluster)}
+    <div class="why">
       <details><summary>Texto normalizado (${d.known_terms} términos conocidos por el modelo)</summary><p>${esc(d.normalized)}</p></details>
     </div>`;
   requestAnimationFrame(() => requestAnimationFrame(() =>

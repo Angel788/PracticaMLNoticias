@@ -39,18 +39,14 @@ datos y los resultados viven en la raíz del repositorio (`src/etapa2/`, `data/e
   en dev, pero con CV 0.7040 frente a 0.7451 y añadido después de evaluar test; se mantiene
   C06 y C29 queda como línea para un test independiente.
 
-## Notebooks de evidencia
+## Notebook único
 
-Los notebooks leen los resultados ya congelados (no vuelven a usar test):
+[`../notebooks/00_etapa2_completo.ipynb`](../notebooks/00_etapa2_completo.ipynb) recorre
+la historia completa en un solo archivo, con tablas y lectura de cada bloque: C-1 a C-5,
+K-1 a K-6 (incluida la binaria K17), test, clusters y guardado de los modelos finales. Lee los resultados congelados, no vuelve a usar test.
 
-| Notebook | Contenido |
-|---|---|
-| `../notebooks/09_etapa2_C3_representacion.ipynb` | C-3: binaria, frecuencia y TF-IDF |
-| `../notebooks/10_etapa2_C4_ngramas.ipynb` | C-4: unigramas, bigramas y trigramas |
-| `../notebooks/11_etapa2_C5_svd.ipynb` | C-5: SVD 50/100/200 y complemento C26--C29 |
-| `../notebooks/12_etapa2_fase3_seleccion_test.ipynb` | Fase 3: selección, 10 errores y test |
-| `../notebooks/13_etapa2_kmeans.ipynb` | K-Means: K-1 a K-6, clusters y contingencia |
-| `../notebooks/14_etapa2_modelos_finales.ipynb` | Selección paso a paso y guardado de los modelos finales |
+Los notebooks 06--14 anteriores se conservan en la rama `etapa2`; esta rama deja solo el
+notebook único para no hacer la entrega tan pesada.
 
 ## Reproducir
 
