@@ -10,6 +10,7 @@ datos y los resultados viven en la raíz del repositorio (`src/etapa2/`, `data/e
 |---|---|
 | `informe.pdf` | Informe final de la Etapa II (18 páginas). |
 | `informe.tex` | Fuente LaTeX del informe. |
+| `REQUISITOS.md` | Índice de lo que pidió el profesor y dónde está cada cosa. |
 | `plan_de_trabajo.md` | Plan de trabajo completo (5 fases, reparto y checklist). |
 | `Plan de trabajo — Proyecto Etapa II (equipo de 2).md` | Versión corta del plan. |
 | `Proyecto_02_Artículos_Etapa_II.pdf` | Enunciado del profesor. |
