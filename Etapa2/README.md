@@ -4,6 +4,8 @@ Esta carpeta reúne el plan, el informe y las instrucciones de la Etapa II. El c
 datos y los resultados viven en la raíz del repositorio (`src/etapa2/`, `data/etapa2/` y
 `results/etapa2/`), porque la Etapa II reutiliza el corpus y la estructura de la Etapa I.
 
+**Equipo:** Angel Yahel Garcia Martinez · Brenda Vergara Martínez
+
 ## Contenido de la carpeta
 
 | Archivo | Qué es |

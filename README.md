@@ -5,7 +5,7 @@ texto libre, devuelve los artículos más parecidos de un corpus de **500 artíc
 (cs.CL, cs.CV, cs.IR y cs.LG) ordenados por similitud coseno. Incluye un benchmark de 15 consultas
 con juicios de relevancia y la evaluación de las 12 configuraciones del modelo.
 
-**Equipo:** Angel Garcia · Bren
+**Equipo:** Angel Yahel Garcia Martinez · Brenda Vergara Martínez
 
 **Reporte completo:** [`reporte_practica2.docx`](reporte_practica2.docx)
 
