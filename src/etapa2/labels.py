@@ -48,7 +48,7 @@ def build_labeled(raw: pd.DataFrame) -> pd.DataFrame:
         "categories": raw["categories"],
     })
     df["split"] = assign_splits(df)
-    return df
+    return df[["document_id", "text", "label", "split", "categories"]]
 
 
 # Lee labeled_documents.tsv.

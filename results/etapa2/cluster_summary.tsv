@@ -1,5 +1,5 @@
-cluster_id	size	top_words	representative_document_ids
-0	192	training, task, language, token, datum, improve, prompt, target, base, reasoning	2610.00673,2609.23449
-1	156	retrieval, evidence, item, recommendation, query, user, base, agent, language, search	2609.38473,2609.37574
-2	113	video, image, visual, generation, scene, training, physical, benchmark, introduce, representation	2609.40347,2610.00812
-3	39	parameter, training, learn, attention, cost, scale, noise, long, introduce, feature	2610.00545,2609.39855
+cluster_id	size	top_words	representative_document_ids	method	configuration
+0	192	training, task, language, token, datum, improve, prompt, target, base, reasoning	2610.00673,2609.23449	KMeans	K02_k4_N2_tfidf_1-1_svd100
+1	156	retrieval, evidence, item, recommendation, query, user, base, agent, language, search	2609.38473,2609.37574	KMeans	K02_k4_N2_tfidf_1-1_svd100
+2	113	video, image, visual, generation, scene, training, physical, benchmark, introduce, representation	2609.40347,2610.00812	KMeans	K02_k4_N2_tfidf_1-1_svd100
+3	39	parameter, training, learn, attention, cost, scale, noise, long, introduce, feature	2610.00545,2609.39855	KMeans	K02_k4_N2_tfidf_1-1_svd100

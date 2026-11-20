@@ -128,7 +128,7 @@ primero con `normalize_doc`. El notebook 14 muestra cómo cargarlos con `joblib.
 | `../results/etapa2/classification_per_class.tsv` | Métricas por clase |
 | `../results/etapa2/confusion_matrices/` | Matrices de confusión (TSV y PNG) |
 | `../results/etapa2/error_analysis.md` | 10 errores de dev explicados |
-| `../results/etapa2/clustering_results.tsv` | `document_id`, `split`, `cluster_id`, `configuration` |
+| `../results/etapa2/clustering_results.tsv` | `document_id`, `split`, `cluster_id`, `method`, `configuration` |
 | `../results/etapa2/cluster_summary.tsv` | Tamaño, top-10 palabras y representativos |
 | `../results/etapa2/cluster_analysis.md` | Selección e interpretación de K-Means |
 

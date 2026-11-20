@@ -473,6 +473,7 @@ def finalize(best: dict, k1_results: list[dict], df: pd.DataFrame) -> dict:
         "document_id": X_train_dev + X_test,
         "split": train_dev["split"].tolist() + ["test"] * len(X_test),
         "cluster_id": list(labels_train_dev) + list(labels_test),
+        "method": "KMeans",
     })
     configuration = (f"{best['experiment_id']}_k{best['k']}_"
                      f"{best['normalization']}_{best['representation']}_"
@@ -486,6 +487,8 @@ def finalize(best: dict, k1_results: list[dict], df: pd.DataFrame) -> dict:
         "size": [int((assignments["cluster_id"] == c).sum()) for c in range(best["k"])],
         "top_words": [", ".join(top[c]) for c in range(best["k"])],
         "representative_document_ids": [",".join(rep[c]) for c in range(best["k"])],
+        "method": "KMeans",
+        "configuration": configuration,
     })
     summary.to_csv(RESULTS_DIR / "cluster_summary.tsv", sep="\t", index=False)
 
